@@ -1,0 +1,105 @@
+---
+title: "Homework 6"
+author: "Jyoti Ankam"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = F)
+knitr::opts_chunk$set(message = F)
+```
+
+## Loading the libraries
+
+```{r}
+
+library(ISLR)
+library(factoextra)
+library(gridExtra)
+library(corrplot)
+library(RColorBrewer)
+library(gplots)
+
+```
+
+```{r}
+data(USArrests)
+dim(USArrests)
+names(USArrests)
+```
+
+
+
+
+## PCA
+
+```{r}
+
+library(jpeg)
+
+img <- readJPEG('peacock.jpeg') #The readJPEG function is used to convert the image into its matrix representation.
+ncol(img)
+nrow(img)
+#The peacock image is now represented as three 1920*1327 matrices as an array with each matrix corresponding to the RGB color value scheme. Extract the individual color value matrices to perform PCA on each
+
+dim(img)
+
+r <- img[,,1]
+g <- img[,,2]
+b <- img[,,3]
+
+#Principal component analysis is performed on each color value matrix. As this example is focused on image compression and not description or interpretation of the variables, the data does not require centering (subtracting the variable means from the respective observation vectors), and the center argument is set to FALSE. If the argument is not set to FALSE, the returned image will not have the right RGB values due to having their respective means subtracted from each pixel color vector
+
+img.r.pca <- prcomp(r, center = FALSE)
+img.g.pca <- prcomp(g, center = FALSE)
+img.b.pca <- prcomp(b, center = FALSE)
+
+rgb.pca <- list(img.r.pca, img.g.pca, img.b.pca) #Collect the PCA objects into a list
+
+# Approximate X with XV_kV_k^T
+compress <- function(pr, k)
+{
+  compressed.img <- pr$x[,1:k] %*% t(pr$rotation[,1:k])
+  compressed.img
+}
+
+# Using first 20 PCs
+pca20 <- sapply(rgb.pca, compress, k = 20, simplify = "array")
+
+writeJPEG(pca20, "pca20.jpeg")
+
+# Using first 50 PCs
+pca50 <- sapply(rgb.pca, compress, k = 50, simplify = "array")
+
+writeJPEG(pca50, "pca50.jpeg")
+
+# Using first 100 PCs
+pca100 <- sapply(rgb.pca, compress, k = 100, simplify = "array")
+
+writeJPEG(pca100, "pca100.jpeg")
+
+# Using first 200 PCs
+pca200 <- sapply(rgb.pca, compress, k = 200, simplify = "array")
+
+writeJPEG(pca200, "pca200.jpeg")
+
+# Using first 400 PCs
+pca400 <- sapply(rgb.pca, compress, k = 400, simplify = "array")
+
+writeJPEG(pca400, "pca400.jpeg")
+
+# Using first 600 PCs
+pca600 <- sapply(rgb.pca, compress, k = 600, simplify = "array")
+
+writeJPEG(pca600, "pca600.jpeg")
+
+# Using first 800 PCs
+pca800 <- sapply(rgb.pca, compress, k = 800, simplify = "array")
+
+writeJPEG(pca800, "pca800.jpeg")
+
+```
+
+With just 20 components, the resulting image retains very few of the original image’s characteristics. However, as the components increase, the quality of the image becomes better with fewer iterations. Clarity of the image is best at 800 components and higher.
+In general, we can conclude that image compression with principal component analysis is a useful and relatively straightforward application of the technique by imaging an image as a (n×p) or (n×n) matrix made of pixel color values. There are some other real-world applications of PCA, such as handwriting/face recognition, and gene expression experiments.
